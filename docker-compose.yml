@@ -1,0 +1,14 @@
+version: "3.0"
+services:
+  flask:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    command: >
+      /bin/bash -c "
+      if [ -d /workspace/.git ]; then cd /workspace && git pull; else git clone https://github.com/<your-username>/<your-repo>.git /workspace; fi &&
+      pip install --no-cache-dir -r requirements.txt &&
+      flask run
+      "
