@@ -178,16 +178,19 @@ def upload_file():
     if not files:
         return jsonify({'error': 'Нет файлов'}), 400
 
+    # Создаем директорию uploads, если она не существует
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
     filenames = []
     for file in files:
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
+            file.save(filepath)  # Сохранение файла локально
 
             try:
                 minio_client.fput_object(user_bucket_name, filename, filepath)
-                os.remove(filepath)
+                os.remove(filepath)  # Удаляем временный файл
                 filenames.append(filename)
             except Exception as e:
                 return jsonify({'error': f'Ошибка при загрузке файла {filename} в MinIO: {e}'}), 500
